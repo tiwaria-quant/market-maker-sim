@@ -51,8 +51,8 @@ vector<Trade> OrderBook::addOrder(Order o) {
     }
     // after the loop: leftover sell rests on the ask side
     if (o.qty > 0) {
-    asks[o.price].push_back(o);          // bids in the buy branch
-    where[o.id] = {false, o.price};      // {true, ...} in the buy branch
+    asks[o.price].push_back(o);          
+    where[o.id] = {false, o.price};      
 }
 }
     else{
@@ -94,7 +94,7 @@ bool OrderBook::cancel(int id) {
     auto it = where.find(id);
     if (it == where.end()) return false;       // not in the book
 
-    Location loc = it->second;                 // copy it: we erase the entry below
+    Location loc = it->second;                
     int p = loc.price;
     if (loc.isBuy) {
     auto level = bids.find(p);
