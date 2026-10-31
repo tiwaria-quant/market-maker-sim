@@ -3,6 +3,7 @@
 #include <functional>
 #include <iostream>
 #include <map>
+#include <optional>
 #include <vector>
 #include <unordered_map>
 
@@ -16,6 +17,8 @@ public:
     map<int, deque<Order>, greater<int>> bids; // best (highest) first
     map<int, deque<Order>> asks;                    // best (lowest) first
     bool cancel(int id);
+    optional<int> bestAsk() const;
+    optional<int> bestBid() const;
     vector<Trade> addOrder(Order o);
     void print() const;
     std::unordered_map<int, Location> where;   // id -> (side, price)
@@ -122,15 +125,37 @@ bool OrderBook::cancel(int id) {
     return true;
 }
 
+optional<int> OrderBook::bestAsk() const {
+    for (const auto& [price, dq] : asks) {
+        for (const Order& o : dq) {
+            if (o.qty > 0) return price;   // found a live order: return the price
+        }
+    }
+    return nullopt;                   // none found
+}
+
+optional<int> OrderBook::bestBid() const {
+    for (const auto& [price, dq] : bids) {
+        for (const Order& o : dq) {
+            if (o.qty > 0) return price;   // found a live order: return the price
+        }
+    }
+    return nullopt;                   // none found
+}
+
 void OrderBook::print() const {
     cout << "ASKS\n";
     for (auto it = asks.rbegin(); it != asks.rend(); ++it)
-        for (const Order& o : it->second)
+        for (const Order& o : it->second){
+            if (o.qty == 0) continue;
             cout << "  " << it->first << " x" << o.qty << " (id " << o.id << ")\n";
+        }
     cout << "BIDS\n";
     for (const auto& [price, dq] : bids)
-        for (const Order& o : dq)
+        for (const Order& o : dq){
+            if (o.qty == 0) continue;
             cout << "  " << price << " x" << o.qty << " (id " << o.id << ")\n";
+        }
 }
 
 
